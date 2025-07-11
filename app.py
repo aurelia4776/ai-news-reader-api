@@ -62,12 +62,11 @@ class FeedSource(db.Model):
             'url': self.url
         }
 
-# (The setup_database function remains the same)
-def setup_database(app_instance):
-    # On Render, the file system is ephemeral, so we check for the DB on startup
-    with app_instance.app_context():
+# This function will now be called manually via an API route
+def setup_database_logic():
+    """Creates tables and seeds initial data."""
+    try:
         db.create_all()
-        # Seed initial sources if the table is empty
         if not FeedSource.query.first():
             print("No sources found. Seeding initial data...")
             INITIAL_FEEDS = {
@@ -80,7 +79,11 @@ def setup_database(app_instance):
             for key, url in INITIAL_FEEDS.items():
                 db.session.add(FeedSource(key=key, url=url))
             db.session.commit()
-            print("Database seeded successfully.")
+            return "Database tables created and initial sources seeded."
+        else:
+            return "Database tables already exist."
+    except Exception as e:
+        return f"An error occurred during database setup: {e}"
 
 
 if hasattr(ssl, '_create_unverified_context'):
@@ -143,6 +146,15 @@ def run_pipeline(source_ids=None):
 
 # --- API ROUTES ---
 
+# NEW: Manual database setup route
+@app.route('/api/setup-database', methods=['GET'])
+def setup_database_route():
+    """Manually triggers the creation of database tables and seeding of initial data."""
+    with app.app_context():
+        message = setup_database_logic()
+    return jsonify({'status': 'completed', 'message': message})
+
+
 @app.route('/api/articles', methods=['GET'])
 def get_articles():
     """Returns a list of all articles."""
@@ -186,7 +198,6 @@ def remove_source(source_id):
     db.session.commit()
     return jsonify({'success': True, 'message': 'Source removed'})
 
-# MODIFIED: Added 'GET' to allow triggering from a browser for easy debugging.
 @app.route('/api/fetch-news', methods=['GET', 'POST'])
 def fetch_news_route():
     """Triggers the background news fetching pipeline."""
@@ -200,7 +211,6 @@ def fetch_news_route():
 
 # --- Main Execution Block ---
 if __name__ == '__main__':
-    # setup_database is called here to ensure tables are created before the server starts
-    setup_database(app)
+    # We no longer call setup_database() here, it will be triggered manually.
     print("Starting API server on http://0.0.0.0:5001")
     serve(app, host='0.0.0.0', port=5001)
