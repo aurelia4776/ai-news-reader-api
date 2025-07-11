@@ -8,3 +8,4 @@ python-dateutil
 pyinstaller
 Flask-Cors
 gunicorn
+waitress
