@@ -1,0 +1,10 @@
+Flask
+Flask-SQLAlchemy
+python-dotenv
+requests
+feedparser
+beautifulsoup4
+python-dateutil
+pyinstaller
+Flask-Cors
+gunicorn
