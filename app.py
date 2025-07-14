@@ -258,12 +258,17 @@ def remove_source(source_id):
     db.session.commit()
     return jsonify({'success': True, 'message': 'Source removed'})
 
-@app.route('/api/fetch-news', methods=['POST'])
+@app.route('/api/fetch-news', methods=['GET', 'POST'])
 def fetch_news_route():
-    data = request.get_json()
-    source_ids = data.get('source_ids') if data else None
+    source_ids = None
+    if request.method == 'POST':
+        data = request.get_json()
+        source_ids = data.get('source_ids') if data else None
+    
+    # For both GET and POST, start the background thread
     thread = threading.Thread(target=run_pipeline, args=(source_ids,))
     thread.start()
+    
     message = f'News fetching started for {len(source_ids)} selected sources.' if source_ids else 'News fetching started for all sources.'
     return jsonify({'success': True, 'message': message})
 
