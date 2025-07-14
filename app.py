@@ -125,7 +125,7 @@ def remove_source(source_id):
     # ... (function logic remains the same)
     pass
 
-@app.route('/api/fetch-news', methods=['POST'])
+@app.route('/api/fetch-news', methods=['GET', 'POST'])
 def fetch_news_route():
     global FETCH_STATUS
     if not fetch_lock.acquire(blocking=False):
