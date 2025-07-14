@@ -62,8 +62,11 @@ class FeedSource(db.Model):
         return { 'id': self.id, 'key': self.key, 'url': self.url }
 
 # --- CORRECTED DATABASE INITIALIZATION ---
+# This code now runs when the app is initialized by the server,
+# ensuring the database and tables are always ready.
 with app.app_context():
     db.create_all()
+    # Seed initial sources if the table is empty
     if not FeedSource.query.first():
         print("Database is empty. Seeding initial sources...")
         INITIAL_FEEDS = {
