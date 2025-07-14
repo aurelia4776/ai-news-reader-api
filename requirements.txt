@@ -10,3 +10,5 @@ Flask-Cors
 gunicorn
 SQLAlchemy~=2.0.41
 waitress~=3.0.2
+psycopg2-binary
+SQLAlchemy-Utils
